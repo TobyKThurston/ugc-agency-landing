@@ -6,6 +6,7 @@
 
 import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import Link from "next/link";
 
 // ---------- Helpers & Theme ----------
 const cx = (...classes: (string | false | null | undefined)[]) => classes.filter(Boolean).join(" ");
@@ -66,7 +67,7 @@ function Button({
     ghost: `text-[${colors.navy}] hover:bg-black/5 focus:ring-[#101828] focus:ring-offset-white`,
     soft: `bg-black/5 text-[${colors.navy}] hover:bg-black/10 focus:ring-[#101828] focus:ring-offset-white`,
   } as const;
-  const Comp: any = href ? "a" : "button";
+  const Comp = (href ? "a" : "button") as React.ElementType;
   return (
     <Comp href={href} onClick={onClick} type={href ? undefined : type} className={cx(base, styles[variant], className)}>
       {children}

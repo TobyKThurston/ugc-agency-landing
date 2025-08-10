@@ -353,7 +353,7 @@ type PortfolioItem = {
 const portfolioItems: PortfolioItem[] = [
   { title: "Visual Ad", src: "/portfolio/brandx-ad.mp4" },
   { title: "Unboxing short visual", src: "/portfolio/beauty-walkthrough.mp4" },
-  { title: "Unboxing", src: "/portfolio/saas-demo.mp4" },
+  { title: "SaaS — Dashboard Demo", src: "/portfolio/saas-demo.mp4" },
 ];
 
 
