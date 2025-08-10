@@ -57,7 +57,7 @@ function Button({
   className = "",
 }: {
   children: React.ReactNode;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
   variant?: "primary" | "ghost" | "soft";
   href?: string;
   type?: "button" | "submit" | "reset";
@@ -169,7 +169,7 @@ function Hero({ onOpenQuote }: { onOpenQuote: () => void }) {
         </>
       )}
 
-      {/* Subtle background logo watermark (PNG). Put /public/logo-mark.png in your project */}
+      {/* Subtle background logo watermark (PNG) */}
       {!reduced && (
         <motion.img
           src="/logo-mark.png"
@@ -368,9 +368,9 @@ type PortfolioItem = {
 };
 
 const portfolioItems: PortfolioItem[] = [
-  { title: "Visual Ad", src: "/portfolio/brandx-ad.mp4" },
-  { title: "Unboxing short visual", src: "/portfolio/beauty-walkthrough.mp4" },
-  { title: "SaaS — Dashboard Demo", src: "/portfolio/saas-demo.mp4" },
+  { title: "Visual Ad", src: "/portfolio/brandx-ad.mp4" /*, poster: "/portfolio/brandx-ad.jpg" */ },
+  { title: "Unboxing short visual", src: "/portfolio/beauty-walkthrough.mp4" /*, poster: "/portfolio/beauty-walkthrough.jpg" */ },
+  { title: "SaaS — Dashboard Demo", src: "/portfolio/saas-demo.mp4" /*, poster: "/portfolio/saas-demo.jpg" */ },
 ];
 
 function AutoVideo({ item }: { item: PortfolioItem }) {
@@ -384,14 +384,14 @@ function AutoVideo({ item }: { item: PortfolioItem }) {
 
     const io = new IntersectionObserver(
       ([entry]) => {
+        if (!el) return;
         if (entry.isIntersecting) {
           el.play().catch(() => {});
         } else {
-          el.pause();
-          el.currentTime = 0;
+          el.pause(); // don't rewind; keeps frame cached for snappier resume
         }
       },
-      { threshold: 0.6 }
+      { threshold: 0.25, rootMargin: "150px 0px" } // start earlier + prebuffer just offscreen
     );
     io.observe(el);
     return () => io.disconnect();
@@ -408,7 +408,8 @@ function AutoVideo({ item }: { item: PortfolioItem }) {
           loop
           muted
           playsInline
-          preload="none"
+          autoPlay
+          preload="metadata"
           onMouseEnter={(e) => (e.currentTarget as HTMLVideoElement).play().catch(() => {})}
           onMouseLeave={(e) => (e.currentTarget as HTMLVideoElement).pause()}
           onClick={(e) => {
