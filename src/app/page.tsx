@@ -508,16 +508,18 @@ function Footer() {
   );
 }
 
-// ---------- Contact Modal (new) ----------
 function ContactModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const email = "contact@apexugc.agency";
+  const [copied, setCopied] = useState(false);
 
   async function copy() {
     try {
       await navigator.clipboard.writeText(email);
-      alert("Email copied to clipboard");
+      setCopied(true);
+      // hide after a moment
+      setTimeout(() => setCopied(false), 1400);
     } catch {
-      // fallback: no-op
+      // ignore if clipboard blocked
     }
   }
 
@@ -530,17 +532,34 @@ function ContactModal({ open, onClose }: { open: boolean; onClose: () => void })
         <p className="mt-2 text-sm text-black/70" style={{ fontFamily: fontStack }}>
           Reach us anytime at:
         </p>
-        <div className="mt-3 rounded-xl border border-black/10 bg-black/5 px-3 py-2 text-sm">
-          {email}
+
+        <div className="mt-3 flex items-center justify-between rounded-xl border border-black/10 bg-black/5 px-3 py-2 text-sm">
+          <span>{email}</span>
+          {/* tiny inline status */}
+          <AnimatePresence>
+            {copied && (
+              <motion.span
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18 }}
+                className="ml-3 text-xs font-semibold text-black/60"
+              >
+                ✓ Copied
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
+
         <div className="mt-5 flex gap-3">
-          <Button onClick={copy} variant="soft">Copy email</Button>
+          <Button onClick={copy} variant="soft">{copied ? "Copied" : "Copy email"}</Button>
           <Button href={`mailto:${email}`}>Open mail app</Button>
         </div>
       </div>
     </div>
   );
 }
+
 
 // ---------- Quote Modal + Form ----------
 function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -571,30 +590,53 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 function QuoteForm({ onSent }: { onSent: () => void }) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+
     const form = e.currentTarget as HTMLFormElement;
     const data = new FormData(form);
-    const subject = encodeURIComponent("Quote request — Apex UGC");
-    const body = encodeURIComponent(
-      `Name: ${data.get("name")}
+
+    const subject = "Quote request — Apex UGC";
+    const message = `Name: ${data.get("name")}
 Email: ${data.get("email")}
 Brand/Website: ${data.get("brand")}
 Budget: ${data.get("budget")}
 Needs: ${data.get("needs")}
-`
-    );
-    const mailto = `mailto:contact@apexugc.agency?subject=${subject}&body=${body}`;
-    window.location.href = mailto;
-    setTimeout(() => {
+`;
+
+    try {
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject,
+          message,
+          // optional: forward reply-to so you can reply from your inbox
+          replyTo: String(data.get("email") || ""),
+        }),
+      });
+
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j?.error ?? `Request failed with ${res.status}`);
+      }
+
+      onSent(); // show the "Request sent" state
+      form.reset();
+    } catch (err: any) {
+      setError(err?.message || "Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
-      onSent();
-    }, 600);
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+      {/* your existing fields exactly as-is */}
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="text-sm">
           <span className="mb-1 block text-black/70">Name</span>
@@ -623,6 +665,9 @@ Needs: ${data.get("needs")}
         <span className="mb-1 block text-black/70">What do you need?</span>
         <textarea required name="needs" rows={4} className="w-full rounded-xl border border-black/15 bg-white px-3 py-2 outline-none focus:border-black/30" placeholder="e.g., 1 short ad for TikTok + scriptwriting add-on" />
       </label>
+
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
       <div className="flex items-center justify-end gap-3">
         <Button href="#" variant="ghost">Cancel</Button>
         <Button type="submit">{loading ? "Sending…" : "Send request"}</Button>
@@ -630,6 +675,7 @@ Needs: ${data.get("needs")}
     </form>
   );
 }
+
 
 // ---------- Page ----------
 export default function Page() {
