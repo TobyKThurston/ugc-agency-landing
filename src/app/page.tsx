@@ -131,7 +131,7 @@ function Navbar({ onOpenQuote }: { onOpenQuote: () => void }) {
   );
 }
 
-// ---------- Hero (manual center with flex; marquee pinned to bottom + subtle PNG watermark) ----------
+// ---------- Hero ----------
 function Hero({ onOpenQuote }: { onOpenQuote: () => void }) {
   const industries = [
     "E-commerce","Beauty","Skincare","Fitness","Tech gadgets","SaaS","AI tools","Fintech",
@@ -487,7 +487,7 @@ function FAQs() {
   );
 }
 
-// ---------- Footer (link routes to /privacy) ----------
+// ---------- Footer ----------
 function Footer() {
   return (
     <footer className="border-t border-black/10 bg-white">
@@ -508,7 +508,41 @@ function Footer() {
   );
 }
 
-// ---------- Modal + Form ----------
+// ---------- Contact Modal (new) ----------
+function ContactModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const email = "contact@apexugc.agency";
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(email);
+      alert("Email copied to clipboard");
+    } catch {
+      // fallback: no-op
+    }
+  }
+
+  return (
+    <div className={cx("fixed inset-0 z-50 items-center justify-center p-4", open ? "flex" : "hidden")}>
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+        <button aria-label="Close" onClick={onClose} className="absolute right-3 top-3 rounded-full p-2 text-black/50 hover:bg-black/5">✕</button>
+        <h3 className="text-xl font-bold" style={{ color: colors.navy, fontFamily: fontStack }}>Email us</h3>
+        <p className="mt-2 text-sm text-black/70" style={{ fontFamily: fontStack }}>
+          Reach us anytime at:
+        </p>
+        <div className="mt-3 rounded-xl border border-black/10 bg-black/5 px-3 py-2 text-sm">
+          {email}
+        </div>
+        <div className="mt-5 flex gap-3">
+          <Button onClick={copy} variant="soft">Copy email</Button>
+          <Button href={`mailto:${email}`}>Open mail app</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Quote Modal + Form ----------
 function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [sent, setSent] = useState(false);
   return (
@@ -551,7 +585,7 @@ Budget: ${data.get("budget")}
 Needs: ${data.get("needs")}
 `
     );
-    const mailto = `mailto:apexUGC@gmail.com?subject=${subject}&body=${body}`;
+    const mailto = `mailto:contact@apexugc.agency?subject=${subject}&body=${body}`;
     window.location.href = mailto;
     setTimeout(() => {
       setLoading(false);
@@ -600,6 +634,8 @@ Needs: ${data.get("needs")}
 // ---------- Page ----------
 export default function Page() {
   const [open, setOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+
   useMemo(() => {
     if (typeof window !== "undefined") {
       document.documentElement.style.scrollBehavior = "smooth";
@@ -621,12 +657,13 @@ export default function Page() {
             <p className="mx-auto mt-2 max-w-2xl text-sm text-black/70">Tell us about your product and goals. We’ll craft a quote for the right deliverables and timeline.</p>
             <div className="mt-6 flex justify-center gap-3">
               <Button onClick={() => setOpen(true)}>Get a Quote</Button>
-              <Button href="mailto:apexUGC@gmail.com" variant="soft">Email us</Button>
+              <Button onClick={() => setContactOpen(true)} variant="soft">Email us</Button>
             </div>
           </div>
         </Reveal>
       </Section>
       <Footer />
+      <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
       <QuoteModal open={open} onClose={() => setOpen(false)} />
     </main>
   );

@@ -122,7 +122,7 @@ function Navbar() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" href="mailto:apexUGC@gmail.com">Contact</Button>
+          <Button variant="ghost" href="mailto:contact@apexugc.agency">Contact</Button>
         </div>
       </Container>
     </div>
@@ -262,7 +262,7 @@ Subscribe to creator updates: ${data.get("subscribe") ? "Yes" : "No"}
 `
     );
 
-    const mailto = `mailto:apexUGC@gmail.com?subject=${subject}&body=${body}`;
+    const mailto = `mailto:contact@apexugc.agency?subject=${subject}&body=${body}`;
     window.location.href = mailto;
 
     setTimeout(() => setLoading(false), 600);

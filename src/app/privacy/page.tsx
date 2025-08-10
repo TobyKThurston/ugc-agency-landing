@@ -102,7 +102,7 @@ function Navbar() {
         </Link>
         <div className="flex items-center gap-2">
           <Button href="/creator" variant="soft">Become a Creator</Button>
-          <Button href="mailto:apexUGC@gmail.com" variant="ghost">Contact</Button>
+          <Button href="mailto:contact@apexugc.agency" variant="ghost">Contact</Button>
         </div>
       </Container>
     </div>
@@ -222,7 +222,7 @@ export default function Page() {
         </ul>
         <Reveal delay={0.12}>
           <p className="mt-4 text-sm text-black/70">
-            To exercise these rights, email <a className="underline" href="mailto:apexUGC@gmail.com">apexUGC@gmail.com</a>.
+            To exercise these rights, email <a className="underline" href="mailto:contact@apexugc.agency">contact@apexugc.agency            </a>.
           </p>
         </Reveal>
       </Section>
@@ -269,11 +269,11 @@ export default function Page() {
           <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
             <h2 className="text-xl font-bold" style={{ color: colors.navy }}>Contact</h2>
             <p className="mt-2 text-sm text-black/70">
-              Questions or requests? Email <a className="underline" href="mailto:apexUGC@gmail.com">apexUGC@gmail.com</a>.
+              Questions or requests? Email <a className="underline" href="mailto:contact@apexugc.agency">contact@apexugc.agency              </a>.
             </p>
             <div className="mt-4 flex gap-3">
               <Button href="/" variant="soft">Back to Home</Button>
-              <Button href="mailto:apexUGC@gmail.com">Email us</Button>
+              <Button href="mailto:contact@apexugc.agency">Email us</Button>
             </div>
           </div>
         </Reveal>
