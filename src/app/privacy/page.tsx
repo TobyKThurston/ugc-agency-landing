@@ -4,6 +4,7 @@
 // Self-contained file: no external UI imports required
 // Minimal, premium styling to match your site
 
+import Link from "next/link";
 import { useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
@@ -16,7 +17,15 @@ const colors = {
 const fontStack =
   'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Poppins, Manrope, Helvetica, Arial, Noto Sans, "Apple Color Emoji", "Segoe UI Emoji"';
 
-function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+function Reveal({
+  children,
+  delay = 0,
+  className = "",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) {
   const reduced = useReducedMotion();
   if (reduced) return <div className={className}>{children}</div>;
   return (
@@ -58,16 +67,28 @@ function Button({
   const base =
     "inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-offset-2";
   const styles = {
-    primary: `bg-[${colors.navy}] text-black hover:opacity-90 focus:ring-[#101828] focus:ring-offset-white shadow-sm`, // matches your main site (black text on primary)
-    ghost: `text-[${colors.navy}] hover:bg-black/5 focus:ring-[#101828] focus:ring-offset-white`,
-    soft: `bg-black/5 text-[${colors.navy}] hover:bg-black/10 focus:ring-[#101828] focus:ring-offset-white`,
+    // Match main site primary (white button, black text, subtle border)
+    primary: "bg-white text-black border border-black/10 hover:bg-black/5 focus:ring-[#101828] focus:ring-offset-white shadow-sm",
+    ghost: "text-[#101828] hover:bg-black/5 focus:ring-[#101828] focus:ring-offset-white",
+    soft: "bg-black/5 text-[#101828] hover:bg-black/10 focus:ring-[#101828] focus:ring-offset-white",
   } as const;
-  const Comp: any = href ? "a" : "button";
-  return (
-    <Comp href={href} className={cx(base, styles[variant], className)}>
-      {children}
-    </Comp>
-  );
+
+  // Internal routes => Link; external/mailto/hash => <a>; otherwise button
+  if (href?.startsWith("/")) {
+    return (
+      <Link href={href} className={cx(base, styles[variant], className)}>
+        {children}
+      </Link>
+    );
+  }
+  if (href) {
+    return (
+      <a href={href} className={cx(base, styles[variant], className)}>
+        {children}
+      </a>
+    );
+  }
+  return <button className={cx(base, styles[variant], className)}>{children}</button>;
 }
 
 // ---------- Navbar (minimal) ----------
@@ -75,10 +96,10 @@ function Navbar() {
   return (
     <div className="sticky top-0 z-40 w-full border-b border-black/10 bg-white/80 backdrop-blur">
       <Container className="flex h-16 items-center justify-between max-w-6xl">
-        <a href="/" className="flex items-center gap-2 font-extrabold tracking-tight" style={{ fontFamily: fontStack }}>
+        <Link href="/" className="flex items-center gap-2 font-extrabold tracking-tight" style={{ fontFamily: fontStack }}>
           <span className="text-xl" style={{ color: colors.navy }}>APEX</span>
           <span className="text-xs rounded bg-black/5 px-2 py-0.5" style={{ color: colors.navy }}>UGC</span>
-        </a>
+        </Link>
         <div className="flex items-center gap-2">
           <Button href="/creator" variant="soft">Become a Creator</Button>
           <Button href="mailto:apexUGC@gmail.com" variant="ghost">Contact</Button>

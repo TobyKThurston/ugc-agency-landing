@@ -4,6 +4,7 @@
 // Self-contained file: no external UI imports required
 // Spec: premium, clean, subtle animations; visible Get a Quote; alternating backgrounds; standalone /privacy
 
+import Link from "next/link";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 
@@ -15,6 +16,9 @@ const colors = {
 };
 const fontStack =
   'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Poppins, Manrope, Helvetica, Arial, Noto Sans, "Apple Color Emoji", "Segoe UI Emoji"';
+
+// Buzzwords (hoisted so effect deps are stable)
+const BUZZ = ["converts", "performs", "sells", "scales"] as const;
 
 function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const reduced = useReducedMotion();
@@ -67,11 +71,26 @@ function Button({
     ghost: `text-[${colors.navy}] hover:bg-black/5 focus:ring-[#101828] focus:ring-offset-white`,
     soft: `bg-black/5 text-[${colors.navy}] hover:bg-black/10 focus:ring-[#101828] focus:ring-offset-white`,
   } as const;
-  const Comp: any = href ? "a" : "button";
+
+  // Use Next.js Link for internal routes; anchor for hashes/external; button otherwise
+  if (href?.startsWith("/")) {
+    return (
+      <Link href={href} className={cx(base, styles[variant], className)} onClick={onClick}>
+        {children}
+      </Link>
+    );
+  }
+  if (href) {
+    return (
+      <a href={href} className={cx(base, styles[variant], className)} onClick={onClick}>
+        {children}
+      </a>
+    );
+  }
   return (
-    <Comp href={href} onClick={onClick} type={href ? undefined : type} className={cx(base, styles[variant], className)}>
+    <button type={type} onClick={onClick} className={cx(base, styles[variant], className)}>
       {children}
-    </Comp>
+    </button>
   );
 }
 
@@ -105,7 +124,7 @@ function Navbar({ onOpenQuote }: { onOpenQuote: () => void }) {
         <div className="flex items-center gap-2">
           <Button href="/creator" variant="soft">Become a Creator</Button>
           <Button onClick={onOpenQuote}>Get a Quote</Button>
-          <Button variant="ghost" href="#contact">Contact</Button>
+          <Button href="#contact" variant="ghost">Contact</Button>
         </div>
       </Container>
     </div>
@@ -121,12 +140,10 @@ function Hero({ onOpenQuote }: { onOpenQuote: () => void }) {
 
   const reduced = useReducedMotion();
 
-  // Buzzword swap
-  const buzz = ["converts", "performs", "sells", "scales"];
   const [idx, setIdx] = useState(0);
   useEffect(() => {
     if (reduced) return;
-    const t = setInterval(() => setIdx((i) => (i + 1) % buzz.length), 2800);
+    const t = setInterval(() => setIdx((i) => (i + 1) % BUZZ.length), 2800);
     return () => clearInterval(t);
   }, [reduced]);
 
@@ -188,14 +205,14 @@ function Hero({ onOpenQuote }: { onOpenQuote: () => void }) {
                 ) : (
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.span
-                      key={buzz[idx]}
+                      key={BUZZ[idx]}
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.5, ease: "easeOut" }}
                       className="inline-block"
                     >
-                      {buzz[idx]}
+                      {BUZZ[idx]}
                     </motion.span>
                   </AnimatePresence>
                 )}
@@ -215,7 +232,7 @@ function Hero({ onOpenQuote }: { onOpenQuote: () => void }) {
           <Reveal delay={0.12}>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Button onClick={onOpenQuote}>Get a Quote</Button>
-              <Button variant="soft" href="#services">See Services</Button>
+              <Button href="#services" variant="soft">See Services</Button>
             </div>
           </Reveal>
         </Container>
@@ -299,7 +316,7 @@ function Services() {
                 ))}
               </ul>
               <div className="mt-5">
-                <Button variant="soft" href="#contact">Add to Quote</Button>
+                <Button href="#contact" variant="soft">Add to Quote</Button>
               </div>
               <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-black/0 group-hover:ring-black/5" />
             </div>
@@ -356,7 +373,6 @@ const portfolioItems: PortfolioItem[] = [
   { title: "SaaS — Dashboard Demo", src: "/portfolio/saas-demo.mp4" },
 ];
 
-
 function AutoVideo({ item }: { item: PortfolioItem }) {
   const ref = useRef<HTMLVideoElement | null>(null);
 
@@ -397,7 +413,7 @@ function AutoVideo({ item }: { item: PortfolioItem }) {
           onMouseLeave={(e) => (e.currentTarget as HTMLVideoElement).pause()}
           onClick={(e) => {
             const v = e.currentTarget as HTMLVideoElement;
-            v.paused ? v.play().catch(() => {}) : v.pause();
+            if (v.paused) { void v.play(); } else { v.pause(); }
           }}
         />
       </div>
@@ -484,7 +500,7 @@ function Footer() {
           </p>
         </div>
         <div className="flex items-center gap-4 text-sm" style={{ fontFamily: fontStack }}>
-          <a href="/privacy" className="text-black/70 hover:text-black">Privacy Policy</a>
+          <Link href="/privacy" className="text-black/70 hover:text-black">Privacy Policy</Link>
         </div>
       </Container>
     </footer>
@@ -573,7 +589,7 @@ Needs: ${data.get("needs")}
         <textarea required name="needs" rows={4} className="w-full rounded-xl border border-black/15 bg-white px-3 py-2 outline-none focus:border-black/30" placeholder="e.g., 1 short ad for TikTok + scriptwriting add-on" />
       </label>
       <div className="flex items-center justify-end gap-3">
-        <Button variant="ghost" href="#">Cancel</Button>
+        <Button href="#" variant="ghost">Cancel</Button>
         <Button type="submit">{loading ? "Sending…" : "Send request"}</Button>
       </div>
     </form>
@@ -604,7 +620,7 @@ export default function Page() {
             <p className="mx-auto mt-2 max-w-2xl text-sm text-black/70">Tell us about your product and goals. We’ll craft a quote for the right deliverables and timeline.</p>
             <div className="mt-6 flex justify-center gap-3">
               <Button onClick={() => setOpen(true)}>Get a Quote</Button>
-              <Button variant="soft" href="mailto:apexUGC@gmail.com">Email us</Button>
+              <Button href="mailto:apexUGC@gmail.com" variant="soft">Email us</Button>
             </div>
           </div>
         </Reveal>

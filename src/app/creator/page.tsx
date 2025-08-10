@@ -17,7 +17,15 @@ const colors = {
 const fontStack =
   'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Poppins, Manrope, Helvetica, Arial, Noto Sans, "Apple Color Emoji", "Segoe UI Emoji"';
 
-function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+function Reveal({
+  children,
+  delay = 0,
+  className = "",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) {
   const reduced = useReducedMotion();
   if (reduced) return <div className={className}>{children}</div>;
   return (
@@ -63,15 +71,31 @@ function Button({
   const base =
     "inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-offset-2";
   const styles = {
-    primary: `bg-[${colors.navy}] text-black hover:opacity-90 focus:ring-[#101828] focus:ring-offset-white shadow-sm`, // black text per your preference
-    ghost: `text-[${colors.navy}] hover:bg-black/5 focus:ring-[#101828] focus:ring-offset-white`,
-    soft: `bg-black/5 text-[${colors.navy}] hover:bg-black/10 focus:ring-[#101828] focus:ring-offset-white`,
+    // match main site button
+    primary: "bg-white text-black border border-black/10 hover:bg-black/5 focus:ring-[#101828] focus:ring-offset-white shadow-sm",
+    ghost: "text-[#101828] hover:bg-black/5 focus:ring-[#101828] focus:ring-offset-white",
+    soft: "bg-black/5 text-[#101828] hover:bg-black/10 focus:ring-[#101828] focus:ring-offset-white",
   } as const;
-  const Comp = (href ? "a" : "button") as React.ElementType;
+
+  // Internal routes -> Link; hash/external/mailto -> <a>; otherwise <button>
+  if (href?.startsWith("/")) {
+    return (
+      <Link href={href} className={cx(base, styles[variant], className)}>
+        {children}
+      </Link>
+    );
+  }
+  if (href) {
+    return (
+      <a href={href} onClick={onClick} className={cx(base, styles[variant], className)}>
+        {children}
+      </a>
+    );
+  }
   return (
-    <Comp href={href} onClick={onClick} type={href ? undefined : type} className={cx(base, styles[variant], className)}>
+    <button onClick={onClick} type={type} className={cx(base, styles[variant], className)}>
       {children}
-    </Comp>
+    </button>
   );
 }
 
@@ -86,10 +110,10 @@ function Navbar() {
   return (
     <div className="sticky top-0 z-40 w-full border-b border-black/10 bg-white/80 backdrop-blur">
       <Container className="flex h-16 items-center justify-between">
-        <a href="/" className="flex items-center gap-2 font-extrabold tracking-tight" style={{ fontFamily: fontStack }} aria-label="Back to Apex UGC">
+        <Link href="/" className="flex items-center gap-2 font-extrabold tracking-tight" style={{ fontFamily: fontStack }} aria-label="Back to Apex UGC">
           <span className="text-xl" style={{ color: colors.navy }}>APEX</span>
           <span className="text-xs rounded bg-black/5 px-2 py-0.5" style={{ color: colors.navy }}>UGC</span>
-        </a>
+        </Link>
         <nav className="hidden gap-6 md:flex">
           {links.map((l) => (
             <a key={l.href} href={l.href} className="text-sm text-black/70 hover:text-black" style={{ fontFamily: fontStack }}>
@@ -160,9 +184,7 @@ function Hero() {
   );
 }
 
-// ---------- Overview ----------
-
-// ---------- Compensation (UGC only, range by level; max 300) ----------
+// ---------- Compensation ----------
 function Rates() {
   const rows = [
     { level: "Beginner", range: "£100–£150", notes: "Solid fundamentals; a few examples; open to feedback and iteration." },
@@ -214,7 +236,7 @@ function Rates() {
   );
 }
 
-// ---------- Registration Form (UGC only) ----------
+// ---------- Registration Form ----------
 function Register() {
   const [loading, setLoading] = useState(false);
 
@@ -390,7 +412,7 @@ function FAQs() {
   );
 }
 
-// ---------- Footer & Privacy ----------
+// ---------- Footer ----------
 function Footer() {
   return (
     <footer className="border-t border-black/10 bg-white">
@@ -404,24 +426,10 @@ function Footer() {
           </p>
         </div>
         <div className="flex items-center gap-4 text-sm" style={{ fontFamily: fontStack }}>
-          <a href="#privacy" className="text-black/70 hover:text-black">Privacy Policy</a>
+          <Link href="/privacy" className="text-black/70 hover:text-black">Privacy Policy</Link>
         </div>
       </Container>
     </footer>
-  );
-}
-
-function Privacy() {
-  return (
-    <Section id="privacy" className="bg-white">
-      <h2 className="text-2xl font-bold" style={{ color: colors.navy, fontFamily: fontStack }}>
-        Privacy Policy (Basic)
-      </h2>
-      <p className="mt-2 max-w-3xl text-sm text-black/70" style={{ fontFamily: fontStack }}>
-        We only use the information you submit to respond to your inquiry. We do not sell or share your data. If you want your data deleted, email{" "}
-        <a className="underline" href="mailto:apexUGC@gmail.com">apexUGC@gmail.com</a>.
-      </p>
-    </Section>
   );
 }
 
@@ -440,9 +448,7 @@ export default function Page() {
       <Rates />
       <Register />
       <FAQs />
-      <Privacy />
       <Footer />
     </main>
   );
 }
-
