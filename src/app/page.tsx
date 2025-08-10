@@ -627,9 +627,12 @@ Needs: ${data.get("needs")}
 
       onSent(); // show the "Request sent" state
       form.reset();
-    } catch (err: any) {
-      setError(err?.message || "Something went wrong. Please try again.");
-    } finally {
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error ? err.message : "Something went wrong. Please try again.";
+        setError(message);
+      } finally {
+    
       setLoading(false);
     }
   }
